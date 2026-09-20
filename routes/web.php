@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 // Module B8: Public Storefront
 Route::get('/', [StorefrontController::class, 'index'])->name('storefront.home');
+Route::post('/enquire', [StorefrontController::class, 'enquire'])->name('storefront.enquire');
 
 // Module B1: Admin Interface (Key protected)
 Route::prefix('admin')->middleware(EnsureAdminKeyIsValid::class)->group(function () {

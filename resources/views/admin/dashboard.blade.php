@@ -41,55 +41,57 @@
                 <h2 class="text-base font-bold text-slate-900 mb-1">Catalog New Automotive Item</h2>
                 <p class="text-xs text-slate-500 mb-4">Injects directly into MySQL using pure parameterized PDO.</p>
 
-                <form method="POST" action="{{ route('admin.items.store') }}" class="space-y-4">
-                    @csrf
-                    <input type="hidden" name="admin_key" value="{{ $adminKey }}">
+                <!-- Update the opening form tag to include enctype -->
+<!-- Form with local file upload only -->
+<form method="POST" action="{{ route('admin.items.store') }}" enctype="multipart/form-data" class="space-y-4">
+    @csrf
+    <input type="hidden" name="admin_key" value="{{ $adminKey }}">
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Item Name</label>
-                        <input type="text" name="itemName" required value="{{ old('itemName') }}"
-                               placeholder="e.g. Apex 16-Inch Carbon Rim Trims (Set of 4)"
-                               class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
-                    </div>
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Item Name</label>
+        <input type="text" name="itemName" required value="{{ old('itemName') }}"
+               placeholder="e.g. Apex 16-Inch Carbon Rim Trims (Set of 4)"
+               class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
+    </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Image URL</label>
-                        <input type="url" name="itemImage" required value="{{ old('itemImage') }}"
-                               placeholder="https://images.unsplash.com/..."
-                               class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
-                    </div>
+    <!-- LOCAL FILE UPLOAD ONLY -->
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Item Image (Upload from Computer)</label>
+        <input type="file" name="itemImage" accept="image/*" required
+               class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-lg bg-white">
+    </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Cost (GBP £)</label>
-                            <input type="number" step="0.01" min="0.01" name="cost" required value="{{ old('cost') }}"
-                                   placeholder="49.99"
-                                   class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Size (Inches)</label>
-                            <input type="number" step="0.5" min="1" max="50" name="size" required value="{{ old('size') }}"
-                                   placeholder="16"
-                                   class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
-                        </div>
-                    </div>
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Cost (GBP £)</label>
+            <input type="number" step="0.01" min="0.01" name="cost" required value="{{ old('cost') }}"
+                   placeholder="49.99"
+                   class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Size (Inches)</label>
+            <input type="number" step="0.5" min="1" max="50" name="size" required value="{{ old('size') }}"
+                   placeholder="16"
+                   class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
+        </div>
+    </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Units In Stock</label>
-                        <input type="number" min="0" name="unitsInStock" required value="{{ old('unitsInStock', 0) }}"
-                               class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
-                    </div>
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Units In Stock</label>
+        <input type="number" min="0" name="unitsInStock" required value="{{ old('unitsInStock', 0) }}"
+               class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">
+    </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
-                        <textarea name="description" rows="3" required placeholder="Impact grade ABS with dual-tension clips..."
-                                  class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">{{ old('description') }}</textarea>
-                    </div>
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+        <textarea name="description" rows="3" required placeholder="Impact grade ABS with dual-tension clips..."
+                  class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500">{{ old('description') }}</textarea>
+    </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-xs transition">
-                        Insert Item (Raw SQL)
-                    </button>
-                </form>
+    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-xs transition">
+        Insert Item (Raw SQL)
+    </button>
+</form>
             </div>
 
             <!-- Right Table: Active Inventory & Stock Updates -->

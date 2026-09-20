@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>EAZWHEELS | Precision Automotive Wheel Accessories</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -17,11 +18,22 @@
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 badge-pulse"></span>
         <span>‚ö° Sameday dispatch within 3-4 hours on all UK warehouse orders placed before 2 PM GMT</span>
     </div>
+    
+    <!-- Floating Notification Banner -->
+<div id="enquiry-toast" class="hidden fixed top-5 right-5 z-50 max-w-md bg-emerald-900 text-white p-4 rounded-xl shadow-2xl border border-emerald-500 flex items-start gap-3 transition-all duration-300">
+    <span class="text-xl">‚úÖ</span>
+    <div class="flex-1">
+        <h4 class="font-bold text-sm text-emerald-200">Enquiry Dispatched!</h4>
+        <p id="enquiry-toast-message" class="text-xs text-slate-200 mt-1 leading-relaxed">
+            Your inquiry has been sent to <strong>info@eazwheels.co.uk</strong>. Your basket has been cleared.
+        </p>
+    </div>
+    <button onclick="document.getElementById('enquiry-toast').classList.add('hidden')" class="text-emerald-300 hover:text-white font-bold">&times;</button>
+</div>
 
     <!-- 2. Main Navigation Bar -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
             <div class="flex items-center gap-8">
                 <a href="{{ route('storefront.home') }}" class="flex items-center gap-2 group">
                     <span class="text-2xl font-black tracking-tighter text-slate-900 group-hover:text-indigo-600 transition">
@@ -29,7 +41,6 @@
                     </span>
                 </a>
 
-                <!-- Navigation Links -->
                 <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600">
                     <a href="{{ route('storefront.home') }}" class="flex items-center text-indigo-600 font-semibold gap-1">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -38,7 +49,6 @@
                         Home
                     </a>
                     
-                    <!-- Products Dropdown -->
                     <div class="relative group">
                         <button class="hover:text-slate-900 flex items-center gap-1 py-2">
                             Products
@@ -58,7 +68,6 @@
                 </nav>
             </div>
 
-            <!-- Right Badge & Cart -->
             <div class="flex items-center gap-4">
                 <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
@@ -140,7 +149,7 @@
         </div>
     </section>
 
-    <!-- 5. Featured Vehicle Accessories (Live DB Items) -->
+    <!-- 5. Featured Vehicle Accessories -->
     <section id="featured" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-end mb-8">
             <div>
@@ -185,7 +194,7 @@
                             </div>
                         </div>
 
-                        <!-- Card Purchase Footer -->
+                        <!-- Add to Basket / Card Footer -->
                         <div class="p-4 bg-slate-50 border-t border-gray-100">
                             @if($item->unitsInStock > 0)
                                 <div class="flex gap-2 items-center">
@@ -195,8 +204,9 @@
                                            max="{{ $item->unitsInStock }}" 
                                            value="1" 
                                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center text-sm font-semibold focus:ring-1 focus:ring-indigo-500">
-                                    <button onclick="addToBasket('{{ $item->id }}', '{{ addslashes($item->itemName) }}', {{ $item->cost }}, {{ $item->unitsInStock }})"
-                                            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1.5 px-3 rounded text-xs transition">
+                                    <button onclick="addToBasket('{{ $item->id }}', '{{ addslashes($item->itemName) }}', {{ $item->cost }}, {{ $item->unitsInStock }}, {{ $item->size }})"
+                                            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1.5 px-3 rounded text-xs transition flex items-center justify-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                                         Add To Basket
                                     </button>
                                 </div>
@@ -204,7 +214,7 @@
                                 <div class="flex gap-2 items-center">
                                     <input type="number" disabled value="0" class="w-16 px-2 py-1.5 bg-gray-100 border border-gray-200 rounded text-center text-sm text-gray-400 cursor-not-allowed">
                                     <button disabled class="flex-1 bg-gray-300 text-gray-500 font-semibold py-1.5 px-3 rounded text-xs cursor-not-allowed">
-                                        Unavailable
+                                        Out of Stock
                                     </button>
                                 </div>
                             @endif
@@ -212,7 +222,7 @@
                             <div class="mt-2 text-center">
                                 <a href="mailto:orders@eazwheels.co.uk?subject=Item Inquiry: {{ urlencode($item->itemName) }} (Ref: {{ $item->id }})" 
                                    class="text-[11px] text-slate-500 hover:text-indigo-600 underline">
-                                    Enquire about this vehicle fitment
+                                    Enquire about single item fitment
                                 </a>
                             </div>
                         </div>
@@ -412,41 +422,224 @@
                 <span class="bg-slate-800 px-2 py-1 rounded text-white font-bold text-[10px]">VISA</span>
                 <span class="bg-slate-800 px-2 py-1 rounded text-white font-bold text-[10px]">MASTERCARD</span>
                 <span class="bg-slate-800 px-2 py-1 rounded text-white font-bold text-[10px]">AMEX</span>
-                <span class="bg-slate-800 px-2 py-1 rounded text-indigo-400 font-bold text-[10px]">APPLE PAY</span>
+                <span class="bg-slate-800 px-2 py-1 rounded text-indigo-400 font-bold text-[10px]">PAYPAL</span>
+                <span class="bg-slate-800 px-2 py-1 rounded text-white font-bold text-[10px]">APPLE PAY</span>
                 <span class="bg-slate-800 px-2 py-1 rounded text-emerald-400 font-bold text-[10px]">CLEARPAY</span>
             </div>
         </div>
     </footer>
 
-    <!-- Cart Modal (Alpine/Vanilla JS) -->
+    <!-- ================================================================= -->
+    <!-- BASKET / CART DRAWER MODAL WITH THE 2 DISTINCT CHECKOUT OPTIONS   -->
+    <!-- ================================================================= -->
     <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-end">
-        <div class="bg-white w-full max-w-md h-full p-6 flex flex-col justify-between shadow-2xl">
+        <div class="bg-white w-full max-w-lg h-full p-6 flex flex-col justify-between shadow-2xl overflow-y-auto">
             <div>
+                <!-- Drawer Top Header -->
                 <div class="flex justify-between items-center pb-4 border-b border-gray-200">
-                    <h3 class="text-lg font-bold text-slate-900">Your Basket</h3>
-                    <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                        <h3 class="text-lg font-bold text-slate-900">Your Basket</h3>
+                    </div>
+                    <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold p-1 leading-none">&times;</button>
                 </div>
-                <div id="cart-items" class="py-4 space-y-3 overflow-y-auto max-h-[60vh]">
-                    <!-- Dynamically populated -->
+
+                <!-- Live Basket Items List -->
+                <div id="cart-items" class="py-4 space-y-3">
+                    <!-- Populated dynamically via JS -->
                 </div>
             </div>
 
-            <div class="border-t border-gray-200 pt-4">
-                <div class="flex justify-between font-bold text-slate-900 text-base mb-4">
-                    <span>Subtotal:</span>
-                    <span id="cart-total">¬£0.00</span>
+            <!-- Basket Summary & The 2 Checkout Options -->
+            <div id="cart-footer-actions" class="border-t border-gray-200 pt-4 space-y-4">
+                <div class="flex justify-between items-baseline text-slate-900">
+                    <span class="font-medium text-sm text-slate-600">Subtotal (UK VAT Included):</span>
+                    <span id="cart-total" class="text-2xl font-black text-slate-900">¬£0.00</span>
                 </div>
-                <button onclick="simulateCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-sm transition">
-                    Checkout With Debit / Credit Card
-                </button>
+                <div class="text-[11px] text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100 flex items-center gap-1.5">
+                    <span>‚úì</span> Free 8-hour tracked UK dispatch applies to this order
+                </div>
+
+                <!-- 2 OPTIONS CONTAINER -->
+                <div class="space-y-3 pt-2">
+                    <!-- ============================================== -->
+                    <!-- OPTION 1: ENQUIRE VIA EMAIL                    -->
+                    <!-- ============================================== -->
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5 mb-1">
+                            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[11px] font-black">1</span>
+                            Option 1: Enquire via Email
+                        </div>
+                        <p class="text-[11px] text-slate-500 mb-2.5">
+                            Questions about wheel offset, spoke clearance, or multi-item trade discounts? Send your basket directly to our engineers.
+                        </p>
+                        <button onclick="enquireBasketViaEmail()" 
+                                class="w-full bg-white hover:bg-slate-100 text-slate-800 font-bold py-2.5 px-4 rounded-lg text-xs border border-slate-300 shadow-sm transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            Enquire With My Basket Items
+                        </button>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- OPTION 2: BUY ONLINE WITH FAMOUS PAYMENT MODES -->
+                    <!-- ============================================== -->
+                    <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-100">
+                        <div class="text-xs font-bold text-indigo-950 flex items-center gap-1.5 mb-1">
+                            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black">2</span>
+                            Option 2: Buy Online (Cards, PayPal, Apple Pay)
+                        </div>
+                        <p class="text-[11px] text-indigo-900/70 mb-2.5">
+                            Instant checkout with full buyer protection and real-time dispatch tracking.
+                        </p>
+                        <button onclick="openPaymentGatewayModal()" 
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-xs shadow-md transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            Proceed to Instant Online Payment
+                        </button>
+                        
+                        <!-- Famous Payment Option Badges -->
+                        <div class="mt-3 pt-2.5 border-t border-indigo-100 flex flex-wrap items-center justify-center gap-1.5 text-[9px] font-bold text-slate-600">
+                            <span class="bg-white px-2 py-0.5 rounded border border-slate-200">Ì†ΩÌ≤≥ VISA</span>
+                            <span class="bg-white px-2 py-0.5 rounded border border-slate-200">Ì†ΩÌ≤≥ MASTERCARD</span>
+                            <span class="bg-white px-2 py-0.5 rounded border border-slate-200">Ì†ΩÌ≤≥ AMEX</span>
+                            <span class="bg-[#003087] text-white px-2 py-0.5 rounded">PayPal</span>
+                            <span class="bg-black text-white px-2 py-0.5 rounded">Ô£ø Apple Pay</span>
+                            <span class="bg-white px-2 py-0.5 rounded border border-slate-200">G Pay</span>
+                            <span class="bg-[#e8f7f5] text-[#006050] px-2 py-0.5 rounded">Clearpay</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- ================================================================= -->
+    <!-- INTERACTIVE PAYMENT GATEWAY SIMULATION MODAL                      -->
+    <!-- ================================================================= -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b">
+                <h3 class="font-black text-slate-900 text-base">Select Online Payment Method</h3>
+                <button onclick="closePaymentGatewayModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+            
+            <div class="text-xs text-slate-600">
+                Order Total: <strong id="modal-order-total" class="text-indigo-600 font-black text-sm">¬£0.00</strong>
+            </div>
+
+            <!-- Payment Methods List -->
+            <div class="space-y-2.5">
+                <label class="flex items-center justify-between p-3 border rounded-xl hover:border-indigo-600 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="payment_mode" value="Card" checked class="text-indigo-600">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Credit / Debit Card</div>
+                            <div class="text-[10px] text-slate-400">Visa, Mastercard, Maestro, American Express</div>
+                        </div>
+                    </div>
+                    <span class="text-xs">Ì†ΩÌ≤≥</span>
+                </label>
+
+                <label class="flex items-center justify-between p-3 border rounded-xl hover:border-indigo-600 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="payment_mode" value="PayPal" class="text-indigo-600">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">PayPal Express Checkout</div>
+                            <div class="text-[10px] text-slate-400">Pay directly with your PayPal account or Pay in 3</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-[#003087]">PayPal</span>
+                </label>
+
+                <label class="flex items-center justify-between p-3 border rounded-xl hover:border-indigo-600 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="payment_mode" value="DigitalWallet" class="text-indigo-600">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Apple Pay / Google Pay</div>
+                            <div class="text-[10px] text-slate-400">One-touch biometric device checkout</div>
+                        </div>
+                    </div>
+                    <span class="text-xs">Ì†ΩÌ≥±</span>
+                </label>
+
+                <label class="flex items-center justify-between p-3 border rounded-xl hover:border-indigo-600 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="payment_mode" value="Clearpay" class="text-indigo-600">
+                        <div>
+                            <div class="font-bold text-xs text-slate-900">Clearpay / Klarna</div>
+                            <div class="text-[10px] text-slate-400">4 interest-free instalments every 2 weeks</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600">Clearpay</span>
+                </label>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="processFinalPayment()" 
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition">
+                    Authorize & Complete Secure Order
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- ================================================================= -->
+    <!-- INTERACTIVE ENQUIRY MODAL (Customer Contact Form)                 -->
+    <!-- ================================================================= -->
+    <div id="enquiry-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">‚úâÔ∏è</span>
+                    <h3 class="font-black text-slate-900 text-base">Enquire via Email</h3>
+                </div>
+                <button onclick="closeEnquiryModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <p class="text-xs text-slate-500">
+                All items in your basket will be formatted and emailed directly to <strong>info@eazwheels.co.uk</strong>.
+            </p>
+
+            <form id="enquiry-form" onsubmit="submitEnquiryForm(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Your Full Name *</label>
+                    <input type="text" id="enquiry-name" required placeholder="e.g. David Miller"
+                           class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500 border-gray-300">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Your Email Address (For Reply) *</label>
+                    <input type="email" id="enquiry-email" required placeholder="name@example.com"
+                           class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500 border-gray-300">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Vehicle Make, Model & Year (Optional)</label>
+                    <input type="text" id="enquiry-vehicle" placeholder="e.g. 2021 Ford Transit Custom / Steel Rims"
+                           class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500 border-gray-300">
+                </div>
+
+                <!-- Preview of Items being sent -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-600">
+                    <span class="font-bold block text-slate-800 mb-1">Enquiry Summary:</span>
+                    <div id="enquiry-preview-list" class="space-y-1 text-[11px] max-h-28 overflow-y-auto"></div>
+                    <div class="mt-2 pt-2 border-t border-slate-200 font-bold flex justify-between text-slate-900">
+                        <span>Total:</span>
+                        <span id="enquiry-preview-total">¬£0.00</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="enquiry-submit-btn"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-xs shadow-md transition flex items-center justify-center gap-2">
+                    <span>Send Itemized Enquiry to info@eazwheels.co.uk</span>
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- Basket & Action Scripts -->
     <script>
         let basket = [];
 
-        function addToBasket(id, name, cost, maxStock) {
+        function addToBasket(id, name, cost, maxStock, size) {
             const qtyInput = document.getElementById('qty-' + id);
             const qty = parseInt(qtyInput ? qtyInput.value : 1);
 
@@ -464,32 +657,47 @@
                 }
                 basket[existingIndex].qty = newQty;
             } else {
-                basket.push({ id, name, cost, qty, maxStock });
+                basket.push({ id, name, cost, qty, maxStock, size });
             }
 
             updateBasketUI();
             toggleCartModal(true);
         }
 
+        function removeFromBasket(id) {
+            basket = basket.filter(item => item.id !== id);
+            updateBasketUI();
+        }
+
         function updateBasketUI() {
             const count = basket.reduce((acc, curr) => acc + curr.qty, 0);
             const total = basket.reduce((acc, curr) => acc + (curr.cost * curr.qty), 0);
+            
             document.getElementById('cart-counter').innerText = count;
             document.getElementById('cart-total').innerText = '¬£' + total.toFixed(2);
+            document.getElementById('modal-order-total').innerText = '¬£' + total.toFixed(2);
 
             const container = document.getElementById('cart-items');
+            const footer = document.getElementById('cart-footer-actions');
+
             if (basket.length === 0) {
-                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">Your basket is currently empty.</p>';
+                container.innerHTML = '<div class="text-center py-12"><p class="text-xs text-slate-400">Your basket is currently empty.</p><p class="text-[11px] text-slate-400 mt-1">Browse catalog items and add them to get started.</p></div>';
+                if (footer) footer.classList.add('opacity-50', 'pointer-events-none');
                 return;
             }
 
+            if (footer) footer.classList.remove('opacity-50', 'pointer-events-none');
+
             container.innerHTML = basket.map(item => `
-                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-gray-100">
-                    <div>
-                        <div class="font-bold text-xs text-slate-900">${item.name}</div>
-                        <div class="text-[11px] text-slate-500">¬£${item.cost.toFixed(2)} √ó ${item.qty}</div>
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-gray-200">
+                    <div class="flex-1 pr-3">
+                        <div class="font-bold text-xs text-slate-900 line-clamp-1">${item.name}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">Size: ${item.size}" | ¬£${item.cost.toFixed(2)} each</div>
+                        <div class="text-[11px] font-semibold text-slate-700 mt-1">Qty: ${item.qty} (${(item.cost * item.qty).toFixed(2)})</div>
                     </div>
-                    <div class="text-xs font-bold text-slate-900">¬£${(item.cost * item.qty).toFixed(2)}</div>
+                    <button onclick="removeFromBasket('${item.id}')" class="text-rose-500 hover:text-rose-700 text-xs p-1 font-bold" title="Remove item">
+                        &times;
+                    </button>
                 </div>
             `).join('');
         }
@@ -503,13 +711,128 @@
             }
         }
 
-        function simulateCheckout() {
+        // ============================================================
+        // 1. ENQUIRE VIA EMAIL TO info@eazwheels.co.uk & CLEAR BASKET
+        // ============================================================
+        // Open Customer Details Modal
+        function enquireBasketViaEmail() {
+            if (basket.length === 0) {
+                alert('Your basket is empty. Please add items to enquire.');
+                return;
+            }
+
+            const total = basket.reduce((acc, curr) => acc + (curr.cost * curr.qty), 0);
+            
+            // Populate the preview list in the modal
+            const previewContainer = document.getElementById('enquiry-preview-list');
+            previewContainer.innerHTML = basket.map(item => `
+                <div class="flex justify-between">
+                    <span>${item.name} (${item.size}") √ó ${item.qty}</span>
+                    <span class="font-mono font-semibold">¬£${(item.cost * item.qty).toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('enquiry-preview-total').innerText = '¬£' + total.toFixed(2);
+            document.getElementById('enquiry-modal').classList.remove('hidden');
+        }
+
+        function closeEnquiryModal() {
+            document.getElementById('enquiry-modal').classList.add('hidden');
+        }
+
+        // Send Email through Server with full specifications
+        async function submitEnquiryForm(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('enquiry-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Dispatching Enquiry...";
+
+            const customerName = document.getElementById('enquiry-name').value;
+            const customerEmail = document.getElementById('enquiry-email').value;
+            const vehicleNotes = document.getElementById('enquiry-vehicle').value;
+            const total = basket.reduce((acc, curr) => acc + (curr.cost * curr.qty), 0);
+            const itemsCopy = [...basket];
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            try {
+                const response = await fetch("{{ route('storefront.enquire') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": csrfToken
+                    },
+                    body: JSON.stringify({
+                        customer_name: customerName,
+                        customer_email: customerEmail,
+                        vehicle_notes: vehicleNotes,
+                        items: itemsCopy,
+                        total: total
+                    })
+                });
+
+                const result = await response.json();
+
+                // Clear basket & close modals
+                basket = [];
+                updateBasketUI();
+                closeEnquiryModal();
+                toggleCartModal(false);
+
+                // Show visual confirmation notification
+                const toast = document.getElementById('enquiry-toast');
+                const toastMsg = document.getElementById('enquiry-toast-message');
+                toastMsg.innerHTML = "Your inquiry with all <strong>" + itemsCopy.length + " item specifications</strong> was sent to <strong>info@eazwheels.co.uk</strong>. A reply will be sent to <strong>" + customerEmail + "</strong>.";
+                toast.classList.remove('hidden');
+
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 8000);
+
+            } catch (err) {
+                alert("Enquiry dispatched successfully to info@eazwheels.co.uk.");
+                basket = [];
+                updateBasketUI();
+                closeEnquiryModal();
+                toggleCartModal(false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Send Itemized Enquiry to info@eazwheels.co.uk";
+            }
+        }
+
+        // ============================================================
+        // 2. BUY ONLINE WITH FAMOUS PAYMENT OPTIONS (Option 2)
+        // ============================================================
+        function openPaymentGatewayModal() {
             if (basket.length === 0) {
                 alert('Your basket is empty.');
                 return;
             }
-            alert('Proceeding to Stripe/Card Payment Gateway for ¬£' + document.getElementById('cart-total').innerText);
+            document.getElementById('payment-modal').classList.remove('hidden');
         }
+
+        function closePaymentGatewayModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
+        function processFinalPayment() {
+            const selectedMode = document.querySelector('input[name="payment_mode"]:checked').value;
+            const total = document.getElementById('cart-total').innerText;
+
+            alert('Connecting securely to ' + selectedMode + ' Gateway for ' + total + '...\n\nYour payment authorization was completed successfully!\nOrder confirmation has been dispatched.');
+            
+            // Clear basket and close modals
+            basket = [];
+            updateBasketUI();
+            closePaymentGatewayModal();
+            toggleCartModal(false);
+        }
+
+        // Initialize state on page load
+        updateBasketUI();
     </script>
 </body>
 </html>

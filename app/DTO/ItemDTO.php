@@ -18,18 +18,20 @@ readonly class ItemDTO
         public ?string $modified = null
     ) {}
 
-    public static function fromDatabase(object $row): self
+    public static function fromDatabase(object|array $row): self
     {
+        $data = (array) $row;
+
         return new self(
-            id: (string) $row->id,
-            itemName: (string) $row->item_name,
-            itemImage: (string) $row->item_image,
-            cost: (float) $row->cost,
-            size: (float) $row->size,
-            unitsInStock: (int) $row->units_in_stock,
-            description: (string) $row->description,
-            created: (string) $row->created,
-            modified: $row->modified ? (string) $row->modified : null
+            id: (string) ($data['id'] ?? ''),
+            itemName: (string) ($data['item_name'] ?? $data['itemName'] ?? ''),
+            itemImage: (string) ($data['item_image'] ?? $data['itemImage'] ?? ''),
+            cost: (float) ($data['cost'] ?? 0.0),
+            size: (float) ($data['size'] ?? 0.0),
+            unitsInStock: (int) ($data['units_in_stock'] ?? $data['unitsInStock'] ?? 0),
+            description: (string) ($data['description'] ?? ''),
+            created: (string) ($data['created'] ?? ''),
+            modified: isset($data['modified']) && $data['modified'] !== null ? (string) $data['modified'] : null
         );
     }
 
