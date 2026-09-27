@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+
+        $middleware->alias([
+            'admin.auth' => \App\Http\Middleware\AdminKeyAuth::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

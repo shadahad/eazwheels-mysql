@@ -16,6 +16,12 @@
             <span class="text-emerald-400 font-mono">● AUTH_KEY_VERIFIED</span>
             <a href="{{ route('storefront.home') }}" class="text-slate-300 hover:text-white underline">View Public Storefront</a>
         </div>
+        <form method="POST" action="{{ route('admin.logout') }}" style="display: inline;">
+            @csrf
+            <button type="submit" style="background: none; border: none; color: #dc2626; cursor: pointer; text-decoration: underline;">
+                Logout
+            </button>
+        </form>
     </nav>
 
     <main class="max-w-7xl mx-auto p-6 sm:p-8">
