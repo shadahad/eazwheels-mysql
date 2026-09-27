@@ -8,6 +8,7 @@ use App\Http\Requests\StoreItemRequest;
 use App\Repositories\ItemRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -27,21 +28,20 @@ class AdminController extends Controller
 
     public function store(StoreItemRequest $request): RedirectResponse
     {
-        $adminKey = $request->input('admin_key');
+        $adminKey = $request->input('admin_key') ?? session('admin_key', '');
         $data = $request->validated();
 
-        // Process image uploaded from local machine
         if ($request->hasFile('itemImage')) {
             $file = $request->file('itemImage');
             $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
 
-            $destination = public_path('uploads/items');
-            if (!file_exists($destination)) {
-                mkdir($destination, 0777, true);
+            $targetDir = public_path('uploads/items');
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
             }
 
-            $file->move($destination, $filename);
-            $data['itemImage'] = url('uploads/items/' . $filename);
+            copy($file->getRealPath(), $targetDir . DIRECTORY_SEPARATOR . $filename);
+            $data['itemImage'] = '/uploads/items/' . $filename;
         }
 
         unset($data['admin_key']);
@@ -51,6 +51,47 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.dashboard', ['admin_key' => $adminKey])
             ->with('status', 'Item successfully cataloged with uploaded image.');
+    }
+
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        $adminKey = $request->input('admin_key') ?? session('admin_key', '');
+
+        $data = $request->validate([
+            'itemName'     => ['required', 'string', 'max:255'],
+            'itemImage'    => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
+            'cost'         => ['required', 'numeric', 'min:0.01'],
+            'size'         => ['required', 'numeric', 'min:1', 'max:50'],
+            'unitsInStock' => ['required', 'integer', 'min:0'],
+            'description'  => ['required', 'string'],
+        ]);
+
+        // Process new image upload if provided
+        if ($request->hasFile('itemImage')) {
+            $file = $request->file('itemImage');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+            $targetDir = public_path('uploads/items');
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+
+            copy($file->getRealPath(), $targetDir . DIRECTORY_SEPARATOR . $filename);
+            $data['itemImage'] = '/uploads/items/' . $filename;
+        } else {
+            // Keep the existing image from database if no new file was uploaded
+            $existing = DB::selectOne("SELECT item_image FROM items WHERE id = ? LIMIT 1", [$id]);
+            $data['itemImage'] = $existing->item_image ?? null;
+        }
+
+        unset($data['admin_key']);
+
+        // Pass to repository for update
+        $this->itemRepository->update($id, $data);
+
+        return redirect()
+            ->route('admin.dashboard', ['admin_key' => $adminKey])
+            ->with('status', "Item '{$data['itemName']}' was successfully updated.");
     }
 
     public function updateStock(Request $request, string $id): RedirectResponse

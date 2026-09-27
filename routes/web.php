@@ -21,5 +21,6 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
 
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/items', [AdminController::class, 'store'])->name('admin.items.store');
+    Route::put('/items/{id}', [AdminController::class, 'update'])->name('admin.items.update');
     Route::post('/items/{id}/stock', [AdminController::class, 'updateStock'])->name('admin.items.stock');
 });

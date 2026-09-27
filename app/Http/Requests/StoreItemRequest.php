@@ -16,25 +16,17 @@ class StoreItemRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        $rules = [
-            'itemName' => ['required', 'string', 'min:2', 'max:255'],
-            'cost' => ['required', 'numeric', 'min:0.01', 'max:99999.99'],
-            'size' => ['required', 'numeric', 'min:1.00', 'max:50.00'],
-            'unitsInStock' => ['required', 'integer', 'min:0', 'max:100000'],
-            'description' => ['required', 'string', 'min:10', 'max:5000'],
-        ];
-
-        // If a file is uploaded from local computer, validate as an image
-        if ($this->hasFile('itemImage')) {
-            $rules['itemImage'] = ['required', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:10240'];
-        } else {
-            // Otherwise validate as an API URL string
-            $rules['itemImage'] = ['required', 'string', 'url', 'max:1024'];
-        }
-
-        return $rules;
-    }
+{
+    return [
+        'itemName'     => ['required', 'string', 'max:255'],
+        'itemImage'    => ['required', 'file', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
+        'cost'         => ['required', 'numeric', 'min:0.01'],
+        'size'         => ['required', 'numeric', 'min:1', 'max:50'],
+        'unitsInStock' => ['required', 'integer', 'min:0'],
+        'description'  => ['required', 'string'],
+        'admin_key'    => ['nullable', 'string'],
+    ];
+}
 
     public function messages(): array
     {
