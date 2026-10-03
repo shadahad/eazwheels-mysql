@@ -6,8 +6,8 @@ namespace App\Repositories;
 
 use App\DTO\ItemDTO;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 
 class RawSqlItemRepository implements ItemRepositoryInterface
@@ -33,7 +33,7 @@ class RawSqlItemRepository implements ItemRepositoryInterface
                 $data['unitsInStock'],
                 $data['description'],
                 $now,
-                $now // modified is set at time of insertion
+                $now
             ]
         );
 
@@ -43,8 +43,8 @@ class RawSqlItemRepository implements ItemRepositoryInterface
             throw new \RuntimeException("Failed to fetch newly created entity with ID: {$id}");
         }
 
-        // Invalidate Redis listings
-        Redis::del(self::CACHE_LIST);
+        // Invalidate cache
+        Cache::forget(self::CACHE_LIST);
 
         return $dto;
     }
@@ -52,10 +52,10 @@ class RawSqlItemRepository implements ItemRepositoryInterface
     public function findById(string $id): ?ItemDTO
     {
         $cacheKey = self::CACHE_PREFIX . $id;
-        $cached = Redis::get($cacheKey);
 
-        if ($cached) {
-            $data = json_decode($cached, false);
+        if (Cache::has($cacheKey)) {
+            $cached = Cache::get($cacheKey);
+            $data = is_string($cached) ? json_decode($cached, false) : (object) $cached;
             return ItemDTO::fromDatabase($data);
         }
 
@@ -66,7 +66,7 @@ class RawSqlItemRepository implements ItemRepositoryInterface
         }
 
         $dto = ItemDTO::fromDatabase($records[0]);
-        Redis::setex($cacheKey, 3600, json_encode($dto->toArray()));
+        Cache::put($cacheKey, json_encode($dto->toArray()), 3600);
 
         return $dto;
     }
@@ -94,6 +94,33 @@ class RawSqlItemRepository implements ItemRepositoryInterface
         return array_map(fn($row) => ItemDTO::fromDatabase($row), $records);
     }
 
+    public function update(string $id, array $data): bool
+    {
+        $now = Carbon::now('Europe/London')->format('Y-m-d H:i:s');
+
+        $affected = DB::update(
+            "UPDATE items 
+             SET item_name = ?, item_image = ?, cost = ?, size = ?, units_in_stock = ?, description = ?, modified = ? 
+             WHERE id = ?",
+            [
+                $data['itemName'],
+                $data['itemImage'],
+                $data['cost'],
+                $data['size'],
+                (int) $data['unitsInStock'],
+                $data['description'],
+                $now,
+                $id
+            ]
+        );
+
+        // Invalidate cache keys
+        Cache::forget(self::CACHE_PREFIX . $id);
+        Cache::forget(self::CACHE_LIST);
+
+        return $affected > 0;
+    }
+
     public function updateStock(string $id, int $unitsInStock): bool
     {
         $now = Carbon::now('Europe/London')->format('Y-m-d H:i:s');
@@ -104,8 +131,8 @@ class RawSqlItemRepository implements ItemRepositoryInterface
         );
 
         if ($affected > 0) {
-            Redis::del(self::CACHE_PREFIX . $id);
-            Redis::del(self::CACHE_LIST);
+            Cache::forget(self::CACHE_PREFIX . $id);
+            Cache::forget(self::CACHE_LIST);
             return true;
         }
 

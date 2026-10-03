@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Primary Accent Gradient (Speed & Ease) -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+
+    <!-- Rim Metallic Finish -->
+    <linearGradient id="metalGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94a3b8" />
+      <stop offset="50%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+
+    <!-- Glow Effect -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Base Rounded Container (App Icon Style) -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Outer Speed Ring (Motion / Ease) -->
+  <path 
+    d="M 190 70 A 190 190 0 0 1 442 322" 
+    fill="none" 
+    stroke="url(#accentGrad)" 
+    stroke-width="12" 
+    stroke-linecap="round" 
+    opacity="0.4"
+  />
+  <path 
+    d="M 130 115 A 190 190 0 0 0 70 256 A 190 190 0 0 0 256 446" 
+    fill="none" 
+    stroke="url(#accentGrad)" 
+    stroke-width="12" 
+    stroke-linecap="round" 
+    opacity="0.8"
+    filter="url(#glow)"
+  />
+
+  <!-- Main Wheel Group -->
+  <g transform="translate(256, 256)">
+    
+    <!-- Outer Tire Structure -->
+    <circle r="150" fill="none" stroke="#1e293b" stroke-width="26" />
+    
+    <!-- Subtle Tire Tread Grips -->
+    <path d="M -150 -15 L -137 0 L -150 15" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 150 -15 L 137 0 L 150 15" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M -15 -150 L 0 -137 L 15 -150" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M -15 150 L 0 137 L 15 150" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Inner Wheel Rim (Alloy Edge) -->
+    <circle r="126" fill="#0b1120" stroke="url(#metalGrad)" stroke-width="6" />
+
+    <!-- Stylized "e" Spoke Geometry (Fast / Swooping) -->
+    <!-- The swooping body of the 'e' integrated into dynamic rim spokes -->
+    <path 
+      d="M -65 10 
+         H 88 
+         A 88 88 0 0 0 -58 -60 
+         A 88 88 0 0 0 -88 20 
+         A 88 88 0 0 0 55 85 
+         A 88 88 0 0 0 84 40" 
+      fill="none" 
+      stroke="url(#accentGrad)" 
+      stroke-width="24" 
+      stroke-linecap="round" 
+      stroke-linejoin="round"
+    />
+
+    <!-- Secondary Alloy Balance Spokes (Connecting rim to form wheel structure) -->
+    <path 
+      d="M -10 -10 L -65 -65" 
+      fill="none" 
+      stroke="url(#metalGrad)" 
+      stroke-width="12" 
+      stroke-linecap="round"
+    />
+    <path 
+      d="M 10 20 L 55 65" 
+      fill="none" 
+      stroke="url(#metalGrad)" 
+      stroke-width="12" 
+      stroke-linecap="round" 
+      opacity="0.7"
+    />
+    <path 
+      d="M -30 20 L -60 65" 
+      fill="none" 
+      stroke="url(#metalGrad)" 
+      stroke-width="12" 
+      stroke-linecap="round" 
+      opacity="0.7"
+    />
+
+    <!-- Wheel Hub Center (Wheel Cap) -->
+    <circle r="26" fill="#0f172a" stroke="url(#metalGrad)" stroke-width="5" />
+    <circle r="10" fill="url(#accentGrad)" />
+
+    <!-- Motion/Speed Accent Dot -->
+    <circle cx="108" cy="-10" r="7" fill="#38bdf8" filter="url(#glow)" />
+  </g>
+</svg>

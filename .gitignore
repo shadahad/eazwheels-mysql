@@ -6,6 +6,7 @@
 /storage/*.key
 /vendor
 .env
+.env.production
 .env.backup
 .env.production
 .phpunit.result.cache
@@ -14,4 +15,5 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 .idea
-.vscode
+.vscodepublic/uploads/*
+public/uploads/

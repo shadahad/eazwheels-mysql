@@ -12,5 +12,6 @@ interface ItemRepositoryInterface
     public function findById(string $id): ?ItemDTO;
     public function getAll(int $limit = 50, int $offset = 0): array;
     public function search(string $keyword): array;
+    public function update(string $id, array $data): bool;
     public function updateStock(string $id, int $unitsInStock): bool;
 }
